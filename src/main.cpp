@@ -4,7 +4,7 @@
 
 #include "state.hpp"
 #include "nodes/main_menu.hpp"
-#include "nodes/routlette.hpp"
+#include "nodes/roulette.hpp"
 #include "nodes/blackjack.hpp"
 
 int main(int argc, char *argv[])

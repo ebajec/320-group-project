@@ -3,6 +3,7 @@
 
 #include "fsm.hpp"
 #include "raylib.h"
+#include "ui/ui.hpp"
 
 namespace color_fsm
 {
@@ -15,57 +16,65 @@ enum {
 	NODE_MAX_ENUM
 };
 
-class RedNode : public IFSMNode
+class BaseColorNode : public IFSMNode
 {
-	int ctr = 0;
-public:
-	virtual void render()
-	{
-        DrawRectangle(100, 100, 200, 120, RED);
+protected:
+	Color fill{};
+	uint32_t stayNode = NODE_RED;
+	uint32_t nextNode = NODE_GREEN;
+	ui::Button button;
 
-	}
-	virtual FSMResult update()
+public:
+	BaseColorNode(Color color, uint32_t stay, uint32_t next, const char *label)
+		: fill(color)
+		, stayNode(stay)
+		, nextNode(next)
+		, button(Rectangle{ 520, 360, 240, 60 }, label)
+	{}
+
+	void render() override
 	{
-		if (ctr++ < 5)
-			return NODE_RED;
-		ctr = 0;
-		return NODE_GREEN;
+		DrawRectangle(100, 100, 200, 120, fill);
+		ui::DrawButton(button);
+
+		if (ui::input::MouseDown())
+		{
+			DrawText("Mouse down", 20, 400, 20, DARKGRAY);
+		}
+	}
+
+	FSMResult update() override
+	{
+		if (ui::IsButtonClicked(button))
+		{
+			return nextNode;
+		}
+		return stayNode;
 	}
 };
 
-class GreenNode : public IFSMNode
+class RedNode : public BaseColorNode
 {
-	int ctr = 0;
 public:
-	virtual void render()
-	{
-        DrawRectangle(100, 100, 200, 120, GREEN);
-
-	}
-	virtual FSMResult update()
-	{
-		if (ctr++ < 5)
-			return NODE_GREEN;
-		ctr = 0;
-		return NODE_BLUE;
-	}
+	RedNode()
+		: BaseColorNode(RED, NODE_RED, NODE_GREEN, "Go Green")
+	{}
 };
 
-class BlueNode : public IFSMNode
+class GreenNode : public BaseColorNode
 {
-	int ctr = 0;
 public:
-	virtual void render()
-	{
-        DrawRectangle(100, 100, 200, 120, BLUE);
-	}
-	virtual FSMResult update()
-	{
-		if (ctr++ < 5)
-			return NODE_BLUE;
-		ctr = 0;
-		return NODE_RED;
-	}
+	GreenNode()
+		: BaseColorNode(GREEN, NODE_GREEN, NODE_BLUE, "Go Blue")
+	{}
+};
+
+class BlueNode : public BaseColorNode
+{
+public:
+	BlueNode()
+		: BaseColorNode(BLUE, NODE_BLUE, NODE_RED, "Back to Red")
+	{}
 };
 
 static inline FSM *create()

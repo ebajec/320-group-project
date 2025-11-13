@@ -35,6 +35,7 @@ public:
 	virtual FSMResult update() = 0;
 };
 
+/// @brief Simple finite state machine. 
 class FSM
 {
 	std::unordered_map<
@@ -53,6 +54,7 @@ public:
 		nodes[index] = std::unique_ptr<IFSMNode>(node);
 	}
 
+	/// @brief Render the current node 
 	void render() 
 	{
 		auto it = nodes.find(current);
@@ -62,6 +64,7 @@ public:
 		it->second->render();
 	}
 
+	/// @brief Advances to node specified by output of last one 
 	FSMStatus update()
 	{
 		auto it = nodes.find(current);

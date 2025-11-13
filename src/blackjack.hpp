@@ -11,7 +11,7 @@ class BlackjackNode : public IFSMNode
 	virtual void render()
 	{
 		DrawText("BLACKJACK (Press ESC to exit)", 
-		   10, 10, 20, MAROON);
+		   10, 10, 30, BLACK);
 	}
 
 	virtual FSMResult update() 

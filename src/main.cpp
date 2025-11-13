@@ -31,7 +31,7 @@ int main(int argc, char *argv[])
 		fsm->update();
 
         BeginDrawing();
-        ClearBackground(RAYWHITE);
+        ClearBackground(MAROON);
 
 		fsm->render();
 

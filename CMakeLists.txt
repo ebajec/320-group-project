@@ -33,6 +33,7 @@ file(GLOB SOURCES "src/*.cpp" "src/*.c")
 add_executable(spin ${SOURCES})
 target_include_directories(spin PRIVATE src)
 target_link_libraries(spin PRIVATE raylib)
+target_compile_definitions(spin PRIVATE RESOURCE_PATH="pop")
 
 include(clang-warnings spin)
 

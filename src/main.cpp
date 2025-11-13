@@ -1,7 +1,6 @@
 #include "raylib.h"
 
 #include "fsm.hpp"
-#include "test_color_fsm.hpp"
 
 #include "state.hpp"
 #include "main_menu.hpp"

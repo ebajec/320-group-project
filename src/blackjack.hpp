@@ -13,6 +13,7 @@ class BlackjackNode : public IFSMNode
 		DrawText("BLACKJACK (Press ESC to exit)", 
 		   10, 10, 20, MAROON);
 	}
+
 	virtual FSMResult update() 
 	{
 		if (IsKeyPressed(KEY_ESCAPE)) {

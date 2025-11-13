@@ -1,5 +1,7 @@
 #include "raylib.h"
 
+#include "globals.h"
+
 #include "fsm.hpp"
 #include "state.hpp"
 
@@ -10,10 +12,10 @@
 int main(int argc, char *argv[])
 {
 	const char * name = "spin with samir";
-    const int screenWidth  = 800;
-    const int screenHeight = 450;
+    g_.screenWidth  = 800;
+    g_.screenHeight = 800;
 
-    InitWindow(screenWidth, screenHeight, name);
+    InitWindow(g_.screenWidth, g_.screenHeight, name);
 
     SetTargetFPS(60);
 	SetExitKey(KEY_NULL);

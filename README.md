@@ -26,6 +26,7 @@ First make sure you have [Chocolatey](https://chocolatey.org/install) installed,
 
 ```powershell
 choco install raylib -y
+```
 
 ## Building 
 

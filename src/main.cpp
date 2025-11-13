@@ -3,9 +3,9 @@
 #include "fsm.hpp"
 
 #include "state.hpp"
-#include "main_menu.hpp"
-#include "routlette.hpp"
-#include "blackjack.hpp"
+#include "nodes/main_menu.hpp"
+#include "nodes/routlette.hpp"
+#include "nodes/blackjack.hpp"
 
 int main(int argc, char *argv[])
 {

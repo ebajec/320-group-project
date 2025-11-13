@@ -1,11 +1,11 @@
 #include "raylib.h"
 
 #include "fsm.hpp"
-
 #include "state.hpp"
-#include "nodes/main_menu.hpp"
-#include "nodes/roulette.hpp"
-#include "nodes/blackjack.hpp"
+
+#include "main_menu.hpp"
+#include "routlette.hpp"
+#include "blackjack.hpp"
 
 int main(int argc, char *argv[])
 {

@@ -1,0 +1,11 @@
+#ifndef MAIN_FSM_HPP
+#define MAIN_FSM_HPP
+
+enum MainState
+{
+	STATE_MAIN_MENU,
+	STATE_BLACKJACK,
+	STATE_ROULETTE
+};
+
+#endif // GAME_STATE_HPP

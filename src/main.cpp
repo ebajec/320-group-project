@@ -13,7 +13,7 @@ int main(int argc, char *argv[])
 
     SetTargetFPS(60);
 
-	std::unique_ptr<FSM> fsm (color_fsm::create());
+	std::unique_ptr<FSM> fsm (new FSM());
 
     while (!WindowShouldClose())    // main loop
     {

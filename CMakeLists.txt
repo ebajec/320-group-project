@@ -34,9 +34,6 @@ add_executable(spin ${SOURCES})
 target_include_directories(spin PRIVATE src)
 target_link_libraries(spin PRIVATE raylib)
 
-add_executable(roulette_test tools/roulette_test.cpp src/roulette.cpp)
-target_include_directories(roulette_test PRIVATE src)
-
 include(clang-warnings spin)
 
 

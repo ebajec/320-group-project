@@ -49,7 +49,7 @@ static inline void draw_title_text()
 		float x = c.x - 0.25*fontsize*(float)strlen(text); 
 		float y = 2*fontsize;
 
-		DrawText(text, x, y, fontsize, LIGHTGRAY);
+		DrawText(text, x, y, fontsize, Color{255,255,255,255});
 }
 
 void MainMenuNode::refreshLayout()
@@ -113,11 +113,28 @@ void MainMenuNode::render()
 
     if (samirTextureLoaded)
     {
+		float tw = samir_tex.width; 
+		float th = samir_tex.height;
+		float tx = c.x - 0.5f*tw; 
+		float ty = c.y - 0.60*th;;
+
+		float bd = 0.05f;
+
+		DrawRectangleRec(
+			Rectangle{
+				.x = tx - bd*tw,
+				.y = ty - bd*th,
+				.width = (1.0f + 2.0f*bd)*tw,
+				.height = (1.0f + 2.0f*bd)*th
+			},
+			Color{0,0,0,255}
+		);
+	
 		DrawTexture(samir_tex, 
-		  c.x - 0.5f*samir_tex.width, 
-		  c.y - 0.5f*samir_tex.height, 
-		  WHITE
-		  );
+			tx, 
+			ty, 
+			WHITE
+			);
     }
     else
     {

@@ -9,9 +9,11 @@
 
 #include "raylib.h"
 
+#include <vector>
 #include <array>
 #include <string>
-#include <vector>
+#include <complex>
+#include <cmath>
 #include <ctime>
 #include <cstdlib>
 
@@ -396,6 +398,50 @@ RouletteNode::RouletteNode()
 }
 
 RouletteNode::~RouletteNode() = default;
+
+
+#define TWOPI 6.28318530718
+
+void gen_wheel_mesh()
+{
+	// number of wheel sections
+	size_t N = 37;
+	float r1 = 1.0f;
+	float r2 = 2.0f;
+	float h = 0.2f;
+
+	double dtht = TWOPI/(double)N;
+
+	std::complex<double> d1 = std::polar(1.0,0.5*dtht);
+	std::complex<double> c = (1.0i);
+	c /= d1;
+
+	// number of vertices per section
+	size_t M = 10;
+	std::complex<double> d2 = std::polar(1.0,dtht/(double)M);
+
+	size_t K = M*N;
+
+	std::vector<Vector3> verts (4*K);
+
+	size_t idx = 0;
+	for (size_t i = 0; i < K; ++i) {
+		float u = (double)i/(double)(K - 1);
+
+		float x1 = r1*c.real();
+		float y1 = r1*c.imag();
+
+		float x2 = r2*c.real();
+		float y2 = r2*c.imag();
+
+		verts[idx++] = {x1, y1, h};
+		verts[idx++] = {x2, y2, h};
+		verts[idx++] = {x1, y1, -h};
+		verts[idx++] = {x2, y2, -h};
+
+		c *= d2;
+	}
+}
 
 void RouletteNode::render()
 {

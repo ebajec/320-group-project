@@ -1,10 +1,16 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
+#include <string>
+
+#include "profile.hpp"
+
 struct AppGlobals
 {
 	int screenWidth;
 	int screenHeight;
+	std::string profileFilePath;
+	profile::PlayerProfile profile;
 };
 
 extern AppGlobals g_;

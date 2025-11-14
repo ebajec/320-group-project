@@ -12,8 +12,13 @@ class MainMenuNode : public IFSMNode
 	ui::Button roulette_button;
 
 	Texture2D samir_tex;
+	bool samirTextureLoaded = false;
+	float lastWidth = 0.0f;
+	float lastHeight = 0.0f;
+	void refreshLayout();
 public:
 	MainMenuNode();	
+	~MainMenuNode() override;
 	virtual void render();
 	virtual FSMResult update(); 
 };

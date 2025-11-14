@@ -11,8 +11,8 @@ public:
 	BlackjackNode();
 	~BlackjackNode() override;
 
-	virtual void render();
-	virtual FSMResult update();
+	virtual void render() override;
+	virtual FSMResult update() override;
 
 private:
 	struct Impl;

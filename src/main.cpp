@@ -15,8 +15,8 @@
 int main(int argc, char *argv[])
 {
     const char * name = "spin with samir";
-    g_.screenWidth  = 800;
-    g_.screenHeight = 800;
+    g_.screenWidth  = 1200;
+    g_.screenHeight = 1200;
     std::filesystem::path profilePath = "profile.env";
     g_.profileFilePath = profilePath.string();
     profile::LoadProfile(g_.profileFilePath, g_.profile);
@@ -48,7 +48,9 @@ int main(int argc, char *argv[])
         EndDrawing();
     }
 
-    profile::SaveProfile(g_.profileFilePath, g_.profile);
+	fsm.reset(nullptr);
+
     CloseWindow();
+    profile::SaveProfile(g_.profileFilePath, g_.profile);
     return 0;
 }

@@ -133,7 +133,7 @@ struct RouletteNode::Impl
 				int number = row * 3 + col + 1;
 				float x = startX + col * cellWidth;
 				float y = startY + (11 - row) * cellHeight;
-				Color base = IsRedNumber(number) ? Color{ 150, 20, 20, 255 } : Color{ 25, 25, 25, 255 };
+				Color base = ::IsRedNumber(number) ? Color{ 150, 20, 20, 255 } : Color{ 25, 25, 25, 255 };
 				straightCells.push_back({ Rectangle{ x, y, cellWidth, cellHeight }, STRAIGHT0 + number, base, std::to_string(number), number });
 			}
 		}
@@ -177,7 +177,7 @@ struct RouletteNode::Impl
 
 	void drawCells(const std::vector<BetCell> &cells) const
 	{
-		for (const BetCell &cell : cells)
+		for (const ::BetCell &cell : cells)
 		{
 			DrawRectangleRec(cell.bounds, cell.baseColor);
 			DrawRectangleLinesEx(cell.bounds, 2.0f, DARKGRAY);

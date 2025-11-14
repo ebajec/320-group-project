@@ -35,6 +35,21 @@ target_include_directories(spin PRIVATE src)
 target_link_libraries(spin PRIVATE raylib)
 target_compile_definitions(spin PRIVATE RESOURCE_PATH="pop")
 
+option(ENABLE_ASAN "Enable AddressSanitizer" OFF)
+
+if(ENABLE_ASAN AND (CMAKE_CXX_COMPILER_ID MATCHES "Clang|GNU"))
+message(STATUS "AddressSanitizer Enabled")
+	target_compile_options(spin PUBLIC
+		-fsanitize=address
+		-fno-omit-frame-pointer    
+		-g                          
+	)
+	target_link_options(spin PUBLIC
+    	-fsanitize=address
+  	)
+endif()
+
+
 include(clang-warnings spin)
 
 

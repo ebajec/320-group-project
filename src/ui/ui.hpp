@@ -1,7 +1,9 @@
-#pragma once
+#ifndef UI_HPP
+#define UI_HPP
 
-#include "ui/button.hpp"
-#include "ui/input.hpp"
+#include "button.hpp"
+#include "input.hpp"
+#include "raylib.h"
 
 namespace ui
 {
@@ -12,3 +14,5 @@ inline void DrawLabel(const char *text, Vector2 position, float size = 20.0f, Co
 }
 
 } // namespace ui
+
+#endif

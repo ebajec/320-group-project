@@ -1,4 +1,5 @@
-#pragma once
+#ifndef UI_BUTTON_HPP
+#define UI_BUTTON_HPP
 
 #include "raylib.h"
 
@@ -59,3 +60,5 @@ inline void DrawButton(const Button &button)
 }
 
 } // namespace ui
+
+#endif // UI_BUTTON_HPP

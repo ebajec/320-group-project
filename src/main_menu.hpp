@@ -19,8 +19,8 @@ class MainMenuNode : public IFSMNode
 public:
 	MainMenuNode();	
 	~MainMenuNode() override;
-	virtual void render();
-	virtual FSMResult update(); 
+	virtual void render() override;
+	virtual FSMResult update() override; 
 };
 
 #endif // MAIN_MENU_HPP

@@ -8,10 +8,10 @@
 #include "profile.hpp"
 
 #include <algorithm>
-#include <array>
-#include <random>
 #include <string>
 #include <vector>
+
+#include <random>
 
 namespace
 {
@@ -396,9 +396,9 @@ struct BlackjackNode::Impl
 		{
 			Rectangle rect { origin.x + (CARD_WIDTH + CARD_PADDING) * (float)i, origin.y, CARD_WIDTH, CARD_HEIGHT };
 			bool hidden = hideHole && i == 1;
-			Color faceColor = hidden ? DARKGRAY : MakeCardColor(hand[i]);
+			Color faceColor = hidden ? DARKGRAY : ::MakeCardColor(hand[i]);
 			DrawRectangleRounded(rect, 0.1f, 6, faceColor);
-			DrawRectangleRoundedLines(rect, 0.1f, 6, 3.0f, hidden ? DARKGRAY : CardBorderColor(hand[i]));
+			DrawRectangleRoundedLines(rect, 0.1f, 6, hidden ? DARKGRAY : CardBorderColor(hand[i]));
 			if (!hidden)
 			{
 				std::string label = CardLabel(hand[i]);

@@ -21,12 +21,20 @@ int main(int argc, char *argv[])
     g_.profileFilePath = profilePath.string();
     profile::LoadProfile(g_.profileFilePath, g_.profile);
 
+#ifdef RESOURCE_PATH
+	g_.resourcePath = RESOURCE_PATH;
+#endif
+
+	printf("Resource Path : %s\n", g_.resourcePath.c_str());
+
     SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_VSYNC_HINT);
     InitWindow(g_.screenWidth, g_.screenHeight, name);
     SetWindowMinSize(640, 480);
 
     SetTargetFPS(60);
 	SetExitKey(KEY_NULL);
+
+	srand(time(NULL));
 
 	std::unique_ptr<FSM> fsm (new FSM());
 

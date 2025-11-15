@@ -7,6 +7,7 @@
 #include "raylib.h"
 
 #include "ui/button.hpp"
+#include "ui/ui.hpp"
 
 #include <cstring>
 #include <array>
@@ -74,14 +75,18 @@ MainMenuNode::MainMenuNode() : IFSMNode()
 	Image samir_img = LoadSamirImage();
 	if (samir_img.data)
 	{
-		ImageResize(&samir_img, 200, 200);
+		ImageResize(&samir_img, 300, 300);
 		samir_tex = LoadTextureFromImage(samir_img);
 		samirTextureLoaded = samir_tex.id != 0;
 		UnloadImage(samir_img);
 	}
-	else
-	{
-		samir_tex = Texture2D{};
+
+	std::string bg_img_path = g_get_path("main-bg.jpg");
+	Image bg_img = LoadImage(bg_img_path.c_str());
+
+	if (bg_img.data) {
+		bg_tex = LoadTextureFromImage(bg_img);
+		UnloadImage(bg_img);
 	}
 
 	if (!samirTextureLoaded)
@@ -102,23 +107,14 @@ MainMenuNode::~MainMenuNode()
 	}
 }
 
-void MainMenuNode::render()
+static inline void DrawBorderedTexture(Texture2D tex, Vector2 c, float border, Color color)
 {
-	if (g_.screenWidth != (int)lastWidth || g_.screenHeight != (int)lastHeight)
-	{
-		refreshLayout();
-	}
-	Vector2 c;
-	g_get_screen_center(&c.x, &c.y);
-
-    if (samirTextureLoaded)
-    {
-		float tw = samir_tex.width; 
-		float th = samir_tex.height;
+		float tw = tex.width; 
+		float th = tex.height;
 		float tx = c.x - 0.5f*tw; 
 		float ty = c.y - 0.60*th;;
 
-		float bd = 0.05f;
+		float bd = border;
 
 		DrawRectangleRec(
 			Rectangle{
@@ -127,14 +123,31 @@ void MainMenuNode::render()
 				.width = (1.0f + 2.0f*bd)*tw,
 				.height = (1.0f + 2.0f*bd)*th
 			},
-			Color{0,0,0,255}
+			color
 		);
 	
-		DrawTexture(samir_tex, 
+		DrawTexture(tex, 
 			tx, 
 			ty, 
 			WHITE
 			);
+}
+
+void MainMenuNode::render()
+{
+	if (g_.screenWidth != (int)lastWidth || g_.screenHeight != (int)lastHeight)
+	{
+		refreshLayout();
+	}
+
+	ui::DrawBackgroundTexture(bg_tex);
+
+	Vector2 c;
+	g_get_screen_center(&c.x, &c.y);
+
+    if (samirTextureLoaded)
+    {
+		DrawBorderedTexture(samir_tex, c, 0.05f, BLACK);
     }
     else
     {

@@ -14,8 +14,11 @@
 #include <string>
 #include <complex>
 #include <cmath>
+#include <cstring>
 #include <ctime>
 #include <cstdlib>
+
+#define TWOPI 6.28318530718
 
 namespace
 {
@@ -38,12 +41,168 @@ namespace
 		}
 		return false;
 	}
+}
 
+static inline Mesh gen_wheel_mesh()
+{
+	// number of wheel sections
+	size_t N = 37;
+	float r1 = 1.5f;
+	float r2 = 2.0f;
+	float h = 0.2f;
+
+	double dtht = TWOPI/(double)N;
+
+	std::complex<double> d1 = std::polar(1.0,0.5*dtht);
+	std::complex<double> c = (1.0i);
+	c /= d1;
+
+	// number of vertices per section
+	size_t M = 1;
+	std::complex<double> d2 = std::polar(1.0,dtht/(double)M);
+
+	size_t K = M*N;
+
+	size_t vidx = 0;
+	size_t nidx = 0;
+	size_t iidx = 0;
+	size_t tidx = 0;
+
+	size_t vcount = 4*K + 4;
+
+	Mesh mesh {};
+
+	mesh.vertexCount = vcount;
+	mesh.triangleCount = 8*K;
+
+	mesh.vertices = (float*)malloc(sizeof(Vector3) * vcount);
+	mesh.normals = (float*)malloc(sizeof(Vector3) * vcount);
+	mesh.texcoords = (float*)malloc(sizeof(Vector2) * vcount);
+	mesh.indices = (unsigned short*)malloc(24*sizeof(unsigned short) * K);
+
+	auto add_quad = [&](
+		int ll, 
+		int lr, 
+		int ur, 
+		int ul) {
+			mesh.indices[iidx++] = (unsigned short)ll;
+			mesh.indices[iidx++] = (unsigned short)lr;
+			mesh.indices[iidx++] = (unsigned short)ur;
+			mesh.indices[iidx++] = (unsigned short)ll;
+			mesh.indices[iidx++] = (unsigned short)ur;
+			mesh.indices[iidx++] = (unsigned short)ul;
+		};
+
+	Vector3 *verts = (Vector3*)mesh.vertices;
+	Vector3 *normals = (Vector3*)mesh.normals;
+	Vector2 *uvs = (Vector2*)mesh.texcoords;
+
+	for (size_t i = 0; i < K + 1; ++i) {
+		float u = (double)i/(double)(K - 1);
+
+		float x1 = r1*c.real();
+		float y1 = r1*c.imag();
+
+		float x2 = r2*c.real();
+		float y2 = r2*c.imag();
+
+		verts[vidx++] = {x1, y1, h};
+		verts[vidx++] = {x2, y2, h};
+		verts[vidx++] = {x1, y1, -h};
+		verts[vidx++] = {x2, y2, -h};
+
+		uvs[tidx++] = {u,0};
+		uvs[tidx++] = {u,1};
+		uvs[tidx++] = {u,0};
+		uvs[tidx++] = {u,1};
+
+		normals[nidx++] = {0, 0, 1};
+		normals[nidx++] = {0, 0, 1};
+		normals[nidx++] = {0, 0, -1};
+		normals[nidx++] = {0, 0, -1};
+
+		if (i == K)
+			break;
+
+		size_t base = 4*i;
+		size_t next = 4*i + 4;
+
+		// top
+		add_quad(base, base + 1, next + 1, next);
+
+		//bottom
+		add_quad(base + 2, base + 3, next + 3, next + 2);
+
+		// front
+		add_quad(base, next, next + 2, base + 2);
+
+		// back
+		add_quad(next + 3, next + 1, base + 1, base + 3);
+
+		c *= d2;
+	}
+
+	return mesh;
+}
+
+struct RenderData
+{
+	Camera3D camera{};
+	Model wheel_model{};
+	Mesh wheel_mesh{};
+	Shader wheel_shader{};
+	Texture bg_tex{};
+	Image bg_img{};
+};
+
+int init_render_data(RenderData * rd)
+{
+	std::string vspath = g_get_path("shader/wheel.vert");
+	std::string fspath = g_get_path("shader/wheel.frag");
+	std::string bgpath = g_get_path("background.png");
+
+	rd->wheel_shader = LoadShader(
+		vspath.c_str(),
+		fspath.c_str()
+	);
+	
+	// I don't really care about cleaning up here
+
+	if (!rd->wheel_shader.id)
+		return -1;
+
+	rd->wheel_mesh = gen_wheel_mesh();
+	UploadMesh(&rd->wheel_mesh, true);
+	rd->wheel_model = LoadModelFromMesh(rd->wheel_mesh);
+	rd->wheel_model.materials[0].shader = rd->wheel_shader;
+
+	rd->camera = Camera3D{
+		.position = Vector3{2,2,2.5},
+		.target = Vector3{0,0,0},
+		.up = Vector3{0,0,1},
+		.fovy = 90,
+		.projection = CAMERA_PERSPECTIVE,
+	};
+
+	Image bg_tmp = LoadImage(bgpath.c_str());
+
+	if (!bg_tmp.data)
+		return -1;
+
+	Texture tex = rd->bg_tex = LoadTextureFromImage(bg_tmp);
+	UnloadImage(bg_tmp);
+
+	SetTextureWrap(tex, TEXTURE_WRAP_REPEAT);
+    SetTextureFilter(tex, TEXTURE_FILTER_BILINEAR);
+
+	return 0;
 }
 
 struct RouletteNode::Impl
 {
 	static constexpr int CHIP_COUNT = 5;
+	static constexpr double SPIN_TIME = 5;
+
 	std::vector<BetCell> straightCells;
 	std::vector<BetCell> outsideCells;
 	ui::Button backButton;
@@ -63,6 +222,11 @@ struct RouletteNode::Impl
 	float lastWidth = 0.0f;
 	float lastHeight = 0.0f;
 
+	double spin_countdown = 0;
+	double spinner_phase = 0;
+
+	RenderData rd;
+
 	Impl()
 	{
 		std::srand(static_cast<unsigned>(std::time(nullptr)));
@@ -79,6 +243,8 @@ struct RouletteNode::Impl
 		}
 		bets.fill(0);
 		updateLayout();
+
+		init_render_data(&rd);
 	}
 
 	int &bankroll()
@@ -91,10 +257,15 @@ struct RouletteNode::Impl
 		profile::SaveProfile(g_.profileFilePath, *playerProfile);
 	}
 
+	bool spinning() {
+		return GetTime() < spin_countdown;
+	}
+
 	void updateLayout()
 	{
 		lastWidth = (float)g_.screenWidth;
 		lastHeight = (float)g_.screenHeight;
+
 		float rightPanelX = (float)g_.screenWidth - 190.0f;
 		float rightPanelWidth = 150.0f;
 		backButton.bounds = Rectangle{ 30, 20, 140, 42 };
@@ -205,9 +376,51 @@ struct RouletteNode::Impl
 		return std::to_string(roll);
 	}
 
+	float spinner_theta(float t)
+	{
+		static float c = 8.f;
+		static float p = 8.f;
+		return c*exp(-p*t);
+	}
+
+	void render_spin_screen()
+	{
+		Vector2 c;
+		g_get_screen_center(&c.x, &c.y);
+
+		ui::DrawBackgroundTexture(rd.bg_tex);
+
+		const char * text = "YOU ARE SPINNING!!!";
+
+		float fontsize = 40;
+		float offset = 0.25*(float)strlen(text)*fontsize;
+
+		DrawText(text, c.x - offset,100, fontsize, WHITE);
+
+		double t = 1.0 - (spin_countdown - GetTime())/SPIN_TIME;
+		double tht = 360*spinner_theta(t); 
+
+		BeginMode3D(rd.camera);
+		DrawModelEx(
+			rd.wheel_model, 
+			Vector3{0,0,0},
+			Vector3{0,0,1},
+			spinner_phase + tht,
+			Vector3{1.f,1.f,1.f},
+			WHITE
+		);
+		EndMode3D();
+	}
+
 	void render()
 	{
 		ensureLayout();
+
+		if (spinning()) {
+			render_spin_screen();
+			return;
+		}
+
 		DrawRectangleGradientV(0, 0, g_.screenWidth, g_.screenHeight, Color{ 3, 61, 43, 255 }, Color{ 7, 33, 18, 255 });
 		DrawText(TextFormat("Roulette | %s", playerProfile->name.c_str()), 30, 60, 40, GOLD);
 		DrawText(TextFormat("Bankroll: $%d", bankroll()), 30, 110, 28, RAYWHITE);
@@ -357,6 +570,9 @@ struct RouletteNode::Impl
 		status = lastOutcome;
 		resetBets(false);
 		persist();
+
+		spin_countdown = GetTime() + SPIN_TIME;
+		spinner_phase = 360*(float)rand()/(float)RAND_MAX;
 	}
 
 	FSMResult update()
@@ -371,6 +587,10 @@ struct RouletteNode::Impl
 			resetBets(true);
 			return MAIN_STATE_MAIN_MENU;
 		}
+
+		if (spinning())
+			return MAIN_STATE_ROULETTE;
+
 		for (int i = 0; i < CHIP_COUNT; ++i)
 		{
 			if (ui::IsButtonClicked(chipButtons[i]))
@@ -399,49 +619,6 @@ RouletteNode::RouletteNode()
 
 RouletteNode::~RouletteNode() = default;
 
-
-#define TWOPI 6.28318530718
-
-void gen_wheel_mesh()
-{
-	// number of wheel sections
-	size_t N = 37;
-	float r1 = 1.0f;
-	float r2 = 2.0f;
-	float h = 0.2f;
-
-	double dtht = TWOPI/(double)N;
-
-	std::complex<double> d1 = std::polar(1.0,0.5*dtht);
-	std::complex<double> c = (1.0i);
-	c /= d1;
-
-	// number of vertices per section
-	size_t M = 10;
-	std::complex<double> d2 = std::polar(1.0,dtht/(double)M);
-
-	size_t K = M*N;
-
-	std::vector<Vector3> verts (4*K);
-
-	size_t idx = 0;
-	for (size_t i = 0; i < K; ++i) {
-		float u = (double)i/(double)(K - 1);
-
-		float x1 = r1*c.real();
-		float y1 = r1*c.imag();
-
-		float x2 = r2*c.real();
-		float y2 = r2*c.imag();
-
-		verts[idx++] = {x1, y1, h};
-		verts[idx++] = {x2, y2, h};
-		verts[idx++] = {x1, y1, -h};
-		verts[idx++] = {x2, y2, -h};
-
-		c *= d2;
-	}
-}
 
 void RouletteNode::render()
 {

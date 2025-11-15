@@ -31,9 +31,9 @@ endif()
 file(GLOB SOURCES "src/*.cpp" "src/*.c")
 
 add_executable(spin ${SOURCES})
-target_include_directories(spin PRIVATE src)
+target_include_directories(spin PUBLIC src)
 target_link_libraries(spin PRIVATE raylib)
-target_compile_definitions(spin PRIVATE RESOURCE_PATH="pop")
+target_compile_definitions(spin PRIVATE RESOURCE_PATH="${CMAKE_CURRENT_SOURCE_DIR}/")
 
 option(ENABLE_ASAN "Enable AddressSanitizer" OFF)
 

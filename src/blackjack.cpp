@@ -10,8 +10,9 @@
 #include <algorithm>
 #include <string>
 #include <vector>
-
 #include <random>
+
+#include <cstring>
 
 namespace
 {
@@ -376,6 +377,7 @@ struct BlackjackNode::Impl
 		playerCanDouble = true;
 		phase = Phase::Betting;
 		status = "Adjust your bet and press Deal.";
+		lastOutcome.clear();
 	}
 
 	void refundStake()
@@ -419,10 +421,7 @@ struct BlackjackNode::Impl
 		DrawText(TextFormat("Bankroll: $%d", bankroll()), 30, 110, 28, RAYWHITE);
 		DrawText(TextFormat("Current Bet: $%d", betAmount), 30, 145, 24, RAYWHITE);
 		DrawText(TextFormat("W/L/P: %d/%d/%d", playerProfile->blackjackWins, playerProfile->blackjackLosses, playerProfile->blackjackPushes), 30, 175, 22, LIGHTGRAY);
-		if (!lastOutcome.empty())
-		{
-			DrawText(lastOutcome.c_str(), 30, 180, 22, LIGHTGRAY);
-		}
+
 
 		DrawText("Dealer", 30, 230, 22, RAYWHITE);
 		renderHand(dealerHand, Vector2{ 30, 260 }, !dealerReveal && phase == Phase::PlayerTurn);
